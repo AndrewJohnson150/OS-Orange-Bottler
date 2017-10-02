@@ -1,4 +1,3 @@
-package multiThreaded;
 
 public class BlockedQ{ 
 	/*

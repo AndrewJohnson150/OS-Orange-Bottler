@@ -1,4 +1,3 @@
-package multiThreaded;
 
 public class Plant implements Runnable {
     // How long do we want to run the juice processing

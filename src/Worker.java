@@ -1,4 +1,4 @@
-package multiThreaded;
+
 
 public class Worker implements Runnable {
 	private BlockedQ get;

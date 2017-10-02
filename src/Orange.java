@@ -1,4 +1,3 @@
-package multiThreaded;
 public class Orange {
     public enum State {
         Fetched(15),
