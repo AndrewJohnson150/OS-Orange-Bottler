@@ -1,4 +1,5 @@
-
+//This code is written mostly by Nate Williams but was modified by Andrew Johnson to utilize
+//Multiple workers per plant.
 public class Plant implements Runnable {
     // How long do we want to run the juice processing
     public static final long PROCESSING_TIME = 5 * 1000;
@@ -7,9 +8,9 @@ public class Plant implements Runnable {
     
     private int orangesInLine;
     
-  //this implementation doesn't allow for more or less workers
     private Worker[] workers = new Worker[5]; 
-    private BlockedQ[] buffers = new BlockedQ[6];
+    private Worker[] extraWorkers = new Worker[5];
+    private BlockedQ[] buffers = new BlockedQ[5];
     
     public static void main(String[] args) {
         // Startup the plants
@@ -44,10 +45,9 @@ public class Plant implements Runnable {
             totalInLine += p.orangesStillInLine();
         }
        System.out.println("Total provided/processed = " + totalProvided + "/" + totalProcessed);
-        System.out.println("Created " + totalBottles +
-                           ", wasted " + totalWasted + " oranges");
+       System.out.println("Created " + totalBottles +
+                           ", wasted " + (totalWasted+totalInLine) + " oranges");
 
-        System.out.println("Oranges still in line (So they were wasted): " +totalInLine);
     }
 
     private static void delay(long time, String errMsg) {
@@ -63,29 +63,26 @@ public class Plant implements Runnable {
 
     private final Thread thread;
     private int orangesProvided;
-    //private int orangesProcessed;
     private volatile boolean timeToWork;
 
     Plant() {
     	orangesInLine = 0;
     	
     	System.out.println("Making conveyer belts");
-    	for (int i = 1; i<6; i++) { // buffers[0] will be null but it is simpler to think of it this way
+    	for (int i = 0; i<5; i++) { 
     		buffers[i] = new BlockedQ();
     	}
     	System.out.println("Hiring Workers");
     	
-    	workers[0] = new Worker(buffers[1]);
+    	workers[0] = new Worker(buffers[0]);
     	
     	for (int i = 1; i<5; i++) {
-    		workers[i] = new Worker(buffers[i],buffers[i+1], i);
+    		workers[i] = new Worker(buffers[i-1],buffers[i], i);
     	}
     	
         orangesProvided = 0;
-        //orangesProcessed = 0;
         thread = new Thread(this, "Plant");
         
-
     }
 
     public void startPlant() {
@@ -108,7 +105,6 @@ public class Plant implements Runnable {
 
     public void run() {
         System.out.print(Thread.currentThread().getName() + " Processing oranges");
-	//	processOranges();
         while (timeToWork) {
         	System.out.print(".");
         	try {
@@ -119,30 +115,29 @@ public class Plant implements Runnable {
         System.out.print("\n");
     }
 
-//    public void processOranges() {
-
-  //  }
-    
 
     public int getProvidedOranges() {
         return workers[0].getOrangesProvided();
     }
 
     public int getProcessedOranges() {
-        return buffers[5].getSize();
+        return buffers[4].getSize();
     }
 
+    
+    //returns the amount of full bottles.
     public int getBottles() {
-        return buffers[5].getSize() / ORANGES_PER_BOTTLE;
+        return buffers[4].getSize() / ORANGES_PER_BOTTLE;
     }
-
+    
+    //
     public int getWaste() {
-        return buffers[5].getSize() % ORANGES_PER_BOTTLE;
+        return buffers[4].getSize() % ORANGES_PER_BOTTLE;
     }
     
     public int orangesStillInLine() {
 		int sum = 0;
-		for (int i = 1; i<buffers.length-1; i++){ //first is null, Last is processed so ignore them
+		for (int i = 0; i<buffers.length-1; i++){
 			sum+=buffers[i].getSize();
 		}
     	return sum;

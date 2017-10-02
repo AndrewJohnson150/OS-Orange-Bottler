@@ -1,3 +1,4 @@
+//This code is written by Nate Williams
 public class Orange {
     public enum State {
         Fetched(15),

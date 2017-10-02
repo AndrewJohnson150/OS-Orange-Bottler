@@ -1,10 +1,9 @@
-
+/*
+ * This class was written last year in CS120 by myself 
+ * (some of it was probably Ted Wendt but I don't recall)
+ * and was modified to work for Oranges and implement synchronization and blocking
+*/
 public class BlockedQ{ 
-	/*
-	 * This class was written last year in CS120 by myself 
-	 * (some of it was probably Ted Wendt but I don't recall)
-	 * and was modified to work for Oranges and implement synchronization and blocking
-	*/
 
 		
 	private Node frontNode;

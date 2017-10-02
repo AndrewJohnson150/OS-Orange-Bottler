@@ -1,5 +1,4 @@
-
-
+//This code is written by Andrew Johnson
 public class Worker implements Runnable {
 	private BlockedQ get;
 	private BlockedQ give;
