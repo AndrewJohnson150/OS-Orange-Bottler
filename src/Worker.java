@@ -22,7 +22,7 @@ public class Worker implements Runnable {
 		get = null;
 		give = giveTo;
 		iAmFirst = true;
-		timeToWork =true; // only need the first worker to change this cause its static
+		timeToWork =true; // only need the first worker to change this because its static
 		thread = new Thread(this, "First Worker");
 		thread.start();
 	}
@@ -63,14 +63,6 @@ public class Worker implements Runnable {
 				doWork();
 			}
 			giveWork();
-		}
-		//overtime, we don't like waste so finish everything that's in your q before you leave.
-		if (!iAmFirst) { 
-			while (!get.isEmpty()) { // I feel like this shouldn't work since they all have diff. times
-				getWork();
-				doWork();
-				giveWork();
-			}
 		}
 	}
 }

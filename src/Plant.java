@@ -2,8 +2,10 @@
 public class Plant implements Runnable {
     // How long do we want to run the juice processing
     public static final long PROCESSING_TIME = 5 * 1000;
-
-    private static final int NUM_PLANTS = 1;
+    
+    private static final int NUM_PLANTS = 2;
+    
+    private int orangesInLine;
     
   //this implementation doesn't allow for more or less workers
     private Worker[] workers = new Worker[5]; 
@@ -65,6 +67,8 @@ public class Plant implements Runnable {
     private volatile boolean timeToWork;
 
     Plant() {
+    	orangesInLine = 0;
+    	
     	System.out.println("Making conveyer belts");
     	for (int i = 1; i<6; i++) { // buffers[0] will be null but it is simpler to think of it this way
     		buffers[i] = new BlockedQ();
@@ -105,8 +109,14 @@ public class Plant implements Runnable {
     public void run() {
         System.out.print(Thread.currentThread().getName() + " Processing oranges");
 	//	processOranges();
-        System.out.print(".");
-        System.out.println("");
+        while (timeToWork) {
+        	System.out.print(".");
+        	try {
+        		Thread.sleep(500); 
+        	}
+        	catch (Exception ignored) {}
+        }
+        System.out.print("\n");
     }
 
 //    public void processOranges() {
