@@ -1,9 +1,10 @@
+package multiThreaded;
 public class Orange {
     public enum State {
         Fetched(15),
         Peeled(38),
-        Squeezed(29),
-        Bottled(17),
+        Squeezed(40),
+        Bottled(45),
         Processed(1);
 
         private static final int finalIndex = State.values().length - 1;
