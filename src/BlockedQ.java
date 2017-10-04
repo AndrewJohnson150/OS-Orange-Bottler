@@ -1,7 +1,9 @@
-/*
+/**
  * This class was written last year in CS120 by myself 
  * (some of it was probably Ted Wendt but I don't recall)
  * and was modified to work for Oranges and implement synchronization and blocking
+ * 
+ * @author Andrew Johnson and Theodore Wendt
 */
 public class BlockedQ{ 
 
@@ -9,13 +11,21 @@ public class BlockedQ{
 	private Node frontNode;
 	private Node backNode;
 	
+	/**
+	 * constructor. Sets back and front node to null.
+	 */
 	public BlockedQ()
 	{
 		frontNode = null;
 		backNode = null;
 	}
 	
-	
+	/**
+	 * this puts an Orange into the queue. If the size of the queue is 1, it will wake up functions
+	 * who are waiting for an orange to be enqueued. This method is synchronized to prevent race conditions.
+	 * @param newEntry An orange which should be enqueued.
+	 * @see #enqueue(Orange)
+	 */
 	public synchronized void enqueue(Orange newEntry) 
 	{
 		Node newNode = new Node(newEntry,null);
@@ -30,7 +40,12 @@ public class BlockedQ{
 		}
 	}
 
-	
+	/**
+	 * This takes an orange from the queue. If the queue is empty, the thread attempting to access this
+	 * will wait, and be notified when the first orange is enqueued.
+	 * @return An orange from the queue.
+	 * @see #enqueue(Orange)
+	 */
 	public synchronized Orange dequeue() 
 	{
 		try {
@@ -46,7 +61,11 @@ public class BlockedQ{
 		return front;
 	}
 
-	
+	/**
+	 * helper method for dequeue() method
+	 * @return the data that the front node points to
+	 * @see #dequeue()
+	 */
 	public Orange getFront() 
 	{
 		if(isEmpty())
@@ -55,20 +74,20 @@ public class BlockedQ{
 			return frontNode.getData();
 	}
 
-	
+	/**
+	 * This method simply checks if the front node is null. If so, the queue is empty.
+	 * @return boolean which is true if queue is empty
+	 */
 	public synchronized boolean isEmpty() 
 	{
 		return frontNode == null;
 	}
 
-	
-	public void clear() 
-	{
-		while(!isEmpty())
-			dequeue();
-	}
 
-		
+	/**
+	 * 
+	 * @return number of Oranges in the queue
+	 */
 	public int getSize()
 	{
 		Node currentNode = frontNode;
@@ -81,6 +100,12 @@ public class BlockedQ{
 		return counter;
 	}
 
+	/**
+	 * This is a Node class that is utilized for the queue class. It essentially is just two pointers,
+	 * one to the next node, and one to relevant data.
+	 * 
+	 * @author Andrew Johnson, Theodore Wendt 
+	 */
 	private class Node
 	{
 		private Orange data;

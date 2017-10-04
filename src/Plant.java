@@ -9,9 +9,14 @@ public class Plant implements Runnable {
     private int orangesInLine;
     
     private Worker[] workers = new Worker[5]; 
-    private Worker[] extraWorkers = new Worker[5];
     private BlockedQ[] buffers = new BlockedQ[5];
     
+    /**
+     * This is the main method. This will be run and it will create several plants as designated by NUM_PLANTS,
+     * then wait for PROCESSING_TIME seconds for the plants to work. It will then call them all to stop,
+     * wait for them to stop, and calculate statistics on the work and output them to the console.
+     * 
+     */
     public static void main(String[] args) {
         // Startup the plants
         Plant[] plants = new Plant[NUM_PLANTS];
@@ -50,6 +55,11 @@ public class Plant implements Runnable {
 
     }
 
+    /**
+     * simple delay method
+     * @param time how long in ms to sleep for
+     * @param errMsg error message to print of something goes wrong.
+     */
     private static void delay(long time, String errMsg) {
         long sleepTime = Math.max(1, time);
         try {
@@ -65,6 +75,10 @@ public class Plant implements Runnable {
     private int orangesProvided;
     private volatile boolean timeToWork;
 
+    /**
+     * initializes a new plant. Will start a new thread after making Workers and BlockedQ
+     * 
+     */
     Plant() {
     	orangesInLine = 0;
     	
@@ -85,16 +99,29 @@ public class Plant implements Runnable {
         
     }
 
+    /**
+     * this sets timeToWork to true and starts the new thread
+     * 
+     * @see #run()
+     */
     public void startPlant() {
         timeToWork = true;
         thread.start();
     }
-
+    
+    /**
+     * this sets timeToWork to false and calls the stopWork() function on the first worker.
+     * 
+     * @see Worker
+     */
     public void stopPlant() {
         timeToWork = false;
         workers[0].stopWork(); //only need one call since its a static variable 
     }
 
+    /**
+     * this calls thread.join
+     */
     public void waitToStop() {
         try {
             thread.join();
@@ -103,6 +130,9 @@ public class Plant implements Runnable {
         }
     }
 
+    /**
+     * semi-busy loops for as long as it is timeToWork==true
+     */
     public void run() {
         System.out.print(Thread.currentThread().getName() + " Processing oranges");
         while (timeToWork) {
@@ -116,25 +146,43 @@ public class Plant implements Runnable {
     }
 
 
+    /**
+     * 
+     * @return number of oranges the first worker fetched, AKA the number of provided oranges
+     */
     public int getProvidedOranges() {
         return workers[0].getOrangesProvided();
     }
 
+    /**
+     * 
+     * @return total amount of processed oranges.
+     */
     public int getProcessedOranges() {
         return buffers[4].getSize();
     }
 
     
-    //returns the amount of full bottles.
+    /**
+     * 
+     * @return the amount of full bottles, uses integer division so it truncates (only full bottles)
+     */
     public int getBottles() {
         return buffers[4].getSize() / ORANGES_PER_BOTTLE;
     }
     
-    //
+    /**
+     * 
+     * @return how many oranges there were that wouldn't fit into a full bottle
+     */
     public int getWaste() {
         return buffers[4].getSize() % ORANGES_PER_BOTTLE;
     }
     
+    /**
+     * 
+     * @return the number of oranges that were still on the conveyer belts.
+     */
     public int orangesStillInLine() {
 		int sum = 0;
 		for (int i = 0; i<buffers.length-1; i++){
