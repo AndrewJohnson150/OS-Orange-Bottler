@@ -3,7 +3,8 @@
  * Ted Wendt but I don't recall) and was modified to work for Oranges and
  * implement synchronization and blocking
  * 
- * @author Andrew Johnson and Theodore Wendt
+ * @author Andrew Johnson
+ * @author Theodore Wendt
  */
 public class BlockedQ {
 
@@ -20,10 +21,11 @@ public class BlockedQ {
 
 	/**
 	 * this puts an Orange into the queue. If the size of the queue is 1, it
-	 * will wake up functions who are waiting for an orange to be enqueued. This
+	 * will wake up threads who are waiting for an orange to be enqueued. This
 	 * method is synchronized to prevent race conditions.
 	 * 
-	 * @param newEntry An orange which should be enqueued.
+	 * @param newEntry
+	 *            An orange which should be enqueued.
 	 * @see #enqueue(Orange)
 	 */
 	public synchronized void enqueue(Orange newEntry) {
@@ -34,6 +36,8 @@ public class BlockedQ {
 			backNode.setNextNode(newNode);
 		backNode = newNode;
 
+		// only when size is 1 because if the size is two there isn't anything
+		// waiting.
 		if (getSize() == 1) {
 			notifyAll();
 		}
@@ -41,14 +45,19 @@ public class BlockedQ {
 
 	/**
 	 * This takes an orange from the queue. If the queue is empty, the thread
-	 * attempting to access this will block (wait), and be notified when the first
-	 * orange is enqueued.
+	 * attempting to access this will block (wait), and be notified when the
+	 * first orange is enqueued.
 	 * 
 	 * @return An orange from the queue.
 	 * @see #enqueue(Orange)
 	 */
 	public synchronized Orange dequeue() {
 		try {
+			// if this was an if statement, all threads would wake up but only
+			// one would be able
+			// to take an orange. That would allow other threads to wake up
+			// without actually
+			// being able to get an orange. To avoid that, we use while.
 			while (isEmpty())
 				wait();
 		} catch (InterruptedException ignore) {
@@ -87,6 +96,8 @@ public class BlockedQ {
 	}
 
 	/**
+	 * loops through the nodes linked to the front node and counts the total
+	 * number of nodes.
 	 * 
 	 * @return number of Oranges in the queue
 	 */
@@ -102,7 +113,10 @@ public class BlockedQ {
 
 	/**
 	 * This is a Node class that is utilized for the queue class. It essentially
-	 * is just two pointers, one to the next node, and one to relevant data.
+	 * is just two pointers, one to the next node, and one to relevant data. It
+	 * then has quite self explanatory method names that I will not go into
+	 * detail about, because they are all simple get, set, and constructor
+	 * methods.
 	 * 
 	 * @author Andrew Johnson, Theodore Wendt
 	 */

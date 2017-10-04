@@ -21,7 +21,6 @@ public class Plant implements Runnable {
 	 * for the plants to work. It will then call them all to stop, wait for them
 	 * to stop, and calculate statistics on the work and output them to the
 	 * console.
-	 * 
 	 */
 	public static void main(String[] args) {
 		// Startup the plants
