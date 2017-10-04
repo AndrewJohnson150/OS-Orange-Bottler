@@ -11,9 +11,9 @@ public class Worker implements Runnable {
 	private Orange currentOrange;
 	private final Thread thread;
 	private boolean iAmFirst;
-	private static volatile boolean timeToWork;
+	private volatile boolean timeToWork;
 	private int orangesProvided;
-
+	
 	/**
 	 * This is the constructor.
 	 * 
@@ -29,9 +29,8 @@ public class Worker implements Runnable {
 		give = giveTo;
 		iAmFirst = false;
 		thread = new Thread(this, "Worker " + num);
-		thread.start();
 	}
-
+	
 	/**
 	 * This is an alternative constructor for the first worker who will function
 	 * differently than the others. Most notably, this constructor takes two
@@ -45,63 +44,9 @@ public class Worker implements Runnable {
 		get = null;
 		give = giveTo;
 		iAmFirst = true;
-		timeToWork = true; // only need the first worker to change this because
-							// its static
 		thread = new Thread(this, "First Worker");
-		thread.start();
 	}
-
-	/**
-	 * This is a method for the first worker to call, it creates a new orange
-	 * and increments orangesProvided
-	 * 
-	 * @see Orange
-	 */
-	private void fetchAnOrange() {
-		currentOrange = new Orange();
-		orangesProvided++;
-	}
-
-	/**
-	 * This method dequeues from the synchronized queue that was passed to it in
-	 * the constructor.
-	 * 
-	 * @see #Worker(BlockedQ, BlockedQ, int)
-	 */
-	public void getWork() {
-		currentOrange = get.dequeue();
-	}
-
-	/**
-	 * This method does work on an orange
-	 * 
-	 * @see Orange
-	 */
-	public void doWork() {
-		currentOrange.runProcess();
-	}
-
-	/**
-	 * This method enqueues to the synchronized queue that was passed to it in
-	 * the constructor.
-	 * 
-	 * @see #Worker(BlockedQ)
-	 * @see #Worker(BlockedQ, BlockedQ, int)
-	 */
-	public void giveWork() {
-		give.enqueue(currentOrange);
-		currentOrange = null;
-	}
-
-	/**
-	 * This signal is called for the first worker when it is time to stop.
-	 * Because timeToWork is static, only the first worker needs to have this
-	 * called.
-	 */
-	public void stopWork() {
-		timeToWork = false;
-	}
-
+	
 	/**
 	 * @return number of oranges provided
 	 */
@@ -127,4 +72,73 @@ public class Worker implements Runnable {
 			giveWork();
 		}
 	}
+
+	public void startWork() {
+		timeToWork = true; 
+		thread.start();
+	}
+	
+	/**
+	 * joins thread
+	 */
+	public void waitToStop() {
+		try {
+			thread.join();
+		} catch (InterruptedException e) {
+			System.err.println(thread.getName() + " stop malfunction");
+		}
+	}
+	
+	/**
+	 * This is a method for the first worker to call, it creates a new orange
+	 * and increments orangesProvided
+	 * 
+	 * @see Orange
+	 * @see #Worker(BlockedQ)
+	 */
+	private void fetchAnOrange() {
+		currentOrange = new Orange();
+		orangesProvided++;
+	}
+
+	/**
+	 * This method dequeues from the synchronized queue that was passed to it in
+	 * the constructor.
+	 * 
+	 * @see #Worker(BlockedQ, BlockedQ, int)
+	 */
+	public void getWork() {
+		currentOrange = get.dequeue();
+	}
+
+	/**
+	 * This method does work on an orange
+	 * 
+	 * @see Orange
+	 */
+	private void doWork() {
+		currentOrange.runProcess();
+	}
+
+	/**
+	 * This method enqueues to the synchronized queue that was passed to it in
+	 * the constructor.
+	 * 
+	 * @see #Worker(BlockedQ)
+	 * @see #Worker(BlockedQ, BlockedQ, int)
+	 */
+	private void giveWork() {
+		give.enqueue(currentOrange);
+		currentOrange = null;
+	}
+
+	/**
+	 * This signal is called for the first worker when it is time to stop.
+	 * Because timeToWork is static, only the first worker needs to have this
+	 * called.
+	 */
+	public void stopWork() {
+		timeToWork = false;
+	}
+
 }

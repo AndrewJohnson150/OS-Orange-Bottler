@@ -79,7 +79,6 @@ public class Plant implements Runnable {
 	public final int ORANGES_PER_BOTTLE = 4;
 
 	private final Thread thread;
-	private int orangesProvided;
 	private volatile boolean timeToWork;
 
 	/**
@@ -102,7 +101,6 @@ public class Plant implements Runnable {
 			workers[i] = new Worker(buffers[i - 1], buffers[i], i);
 		}
 
-		orangesProvided = 0;
 		thread = new Thread(this, "Plant");
 
 	}
@@ -125,7 +123,10 @@ public class Plant implements Runnable {
 	 */
 	public void stopPlant() {
 		timeToWork = false;
-		workers[0].stopWork(); // only need one call since its a static variable
+
+		for (Worker w : workers) {
+			w.stopWork(); 
+		}
 	}
 
 	/**
@@ -133,6 +134,9 @@ public class Plant implements Runnable {
 	 */
 	public void waitToStop() {
 		try {
+			for (Worker w : workers) {
+				w.waitToStop();
+			}
 			thread.join();
 		} catch (InterruptedException e) {
 			System.err.println(thread.getName() + " stop malfunction");
@@ -144,6 +148,9 @@ public class Plant implements Runnable {
 	 * while running so that the user knows the program is running
 	 */
 	public void run() {
+		for (Worker w : workers) {
+			w.startWork(); 
+		}	
 		System.out.print(Thread.currentThread().getName() + " Processing oranges");
 		while (timeToWork) {
 			System.out.print(".");
@@ -152,7 +159,7 @@ public class Plant implements Runnable {
 			} catch (Exception ignored) {
 			}
 		}
-		System.out.print("\n");
+		System.out.println("");
 	}
 
 	/**
@@ -178,7 +185,7 @@ public class Plant implements Runnable {
 	 *         (only full bottles)
 	 */
 	public int getBottles() {
-		return buffers[4].getSize() / ORANGES_PER_BOTTLE;
+		return getProcessedOranges() / ORANGES_PER_BOTTLE;
 	}
 
 	/**
@@ -186,7 +193,7 @@ public class Plant implements Runnable {
 	 * @return how many oranges there were that wouldn't fit into a full bottle
 	 */
 	public int getWaste() {
-		return buffers[4].getSize() % ORANGES_PER_BOTTLE;
+		return getProcessedOranges() % ORANGES_PER_BOTTLE;
 	}
 
 	/**
