@@ -2,7 +2,8 @@
  * This code is written mostly by Nate Williams but was modified by Andrew
  * Johnson to utilize Multiple workers per plant.
  * 
- * @author Nate Williams, Andrew Johnson
+ * @author Andrew Johnson
+ * @author Nate Williams
  */
 public class Plant implements Runnable {
 	// How long do we want to run the juice processing
@@ -10,10 +11,10 @@ public class Plant implements Runnable {
 
 	private static final int NUM_PLANTS = 2;
 
-	private int orangesInLine;
-
 	private Worker[] workers = new Worker[5];
 	private BlockedQ[] buffers = new BlockedQ[5];
+	private Worker firstWorker;
+	private BlockedQ processedOrangeQ;
 
 	/**
 	 * This is the main method. This will be run and it will create several
@@ -37,10 +38,12 @@ public class Plant implements Runnable {
 		for (Plant p : plants) {
 			p.stopPlant();
 		}
+		//we run these in separate loops so that we can call each plant to stop before we wait for each
 		for (Plant p : plants) {
 			p.waitToStop();
 		}
 
+		System.out.println("Plants have stopped. Results:");
 		// Summarize the results
 		int totalProvided = 0;
 		int totalProcessed = 0;
@@ -87,16 +90,17 @@ public class Plant implements Runnable {
 	 * 
 	 */
 	Plant() {
-		orangesInLine = 0;
-
 		System.out.println("Making conveyer belts");
 		for (int i = 0; i < 5; i++) {
 			buffers[i] = new BlockedQ();
 		}
+		processedOrangeQ = buffers[4]; //this is the queue that gets all the processed oranges
+		
 		System.out.println("Hiring Workers");
 
-		workers[0] = new Worker(buffers[0]);
-
+		workers[0] = new Worker(buffers[0]); // the first worker is special
+		firstWorker = workers[0];
+		
 		for (int i = 1; i < 5; i++) {
 			workers[i] = new Worker(buffers[i - 1], buffers[i], i);
 		}
@@ -168,7 +172,7 @@ public class Plant implements Runnable {
 	 *         provided oranges
 	 */
 	public int getProvidedOranges() {
-		return workers[0].getOrangesProvided();
+		return firstWorker.getOrangesProvided();
 	}
 
 	/**
@@ -176,7 +180,7 @@ public class Plant implements Runnable {
 	 * @return total amount of processed oranges.
 	 */
 	public int getProcessedOranges() {
-		return buffers[4].getSize();
+		return processedOrangeQ.getSize();
 	}
 
 	/**

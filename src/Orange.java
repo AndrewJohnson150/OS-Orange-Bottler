@@ -2,7 +2,7 @@
  * This is the class which represents a virtual Orange
  * 
  * @author Nate Williams
- *
+ * @author Andrew Johnson
  */
 public class Orange {
 	/**

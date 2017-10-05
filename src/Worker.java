@@ -57,7 +57,7 @@ public class Worker implements Runnable {
 	/**
 	 * In this run() method, the worker will work while it is timeToWork. If it
 	 * is the first worker, then it will fetch oranges and give them to the next
-	 * worker. If it is not the first, it will get an orange , do work on it,
+	 * worker. If it is not the first, it will get an orange, do work on it,
 	 * and give it to the next.
 	 */
 	@Override
@@ -73,6 +73,11 @@ public class Worker implements Runnable {
 		}
 	}
 
+	/**
+	 * this method allows the workers to start working. We could run these commands in the constructor,
+	 * but that would mean that the workers are starting when they are created, and not when the plant
+	 * starts running
+	 */
 	public void startWork() {
 		timeToWork = true; 
 		thread.start();
@@ -133,9 +138,9 @@ public class Worker implements Runnable {
 	}
 
 	/**
-	 * This signal is called for the first worker when it is time to stop.
-	 * Because timeToWork is static, only the first worker needs to have this
-	 * called.
+	 * This method is called when it is time to stop. This could be a static implementation of timeToWork
+	 * so that only one worker would need to have it called, but that would restrict further development
+	 * like if we wanted to stop the first worker before the others
 	 */
 	public void stopWork() {
 		timeToWork = false;
