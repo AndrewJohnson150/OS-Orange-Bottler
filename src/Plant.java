@@ -125,8 +125,10 @@ public class Plant implements Runnable {
 	 * @see #run()
 	 * @see Worker
 	 */
-	public synchronized void stopPlant() {
-		notifyAll();
+	public void stopPlant() {
+		synchronized(this) {
+			notifyAll();
+		}
 		for (Worker w : workers) {
 			w.stopWork(); 
 		}
@@ -151,14 +153,16 @@ public class Plant implements Runnable {
 	 * 
 	 * @see #stopPlant()
 	 */
-	public synchronized void run() {
+	public void run() {
 		for (Worker w : workers) {
 			w.startWork(); 
 		}	
 		System.out.print(Thread.currentThread().getName() + " Processing oranges");
-		try {
-			wait();
-		} catch (Exception ignored) {}
+		synchronized (this) {
+			try {
+				wait();
+			} catch (Exception ignored) {}
+		}
 		System.out.println("");
 	}
 
