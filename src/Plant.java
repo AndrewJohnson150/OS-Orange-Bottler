@@ -82,7 +82,6 @@ public class Plant implements Runnable {
 	public final int ORANGES_PER_BOTTLE = 4;
 
 	private final Thread thread;
-	private volatile boolean timeToWork;
 
 	/**
 	 * initializes a new plant. Will start a new thread after making Worker and
@@ -110,27 +109,27 @@ public class Plant implements Runnable {
 	}
 
 	/**
-	 * this sets timeToWork to true and starts the new thread
+	 * starts the new thread
 	 * 
 	 * @see #run()
 	 */
 	public void startPlant() {
-		timeToWork = true;
 		thread.start();
 	}
 
 	/**
-	 * this sets timeToWork to false and calls the stopWork() function on each worker, which
-	 * should begin the process of that thread stop working.
+	 * calls notifyAll() wihich makes the run() thread stop running.
+	 * Also calls the stopWork() function on each worker, which
+	 * should begin the process of that thread stopping.
 	 * 
+	 * @see #run()
 	 * @see Worker
 	 */
 	public synchronized void stopPlant() {
-		timeToWork = false;
+		notifyAll();
 		for (Worker w : workers) {
 			w.stopWork(); 
 		}
-		notifyAll();
 	}
 
 	/**
@@ -149,6 +148,8 @@ public class Plant implements Runnable {
 
 	/**
 	 * Starts the worker's run methods and then blocks until stopPlant() wakes it up.
+	 * 
+	 * @see #stopPlant()
 	 */
 	public synchronized void run() {
 		for (Worker w : workers) {
