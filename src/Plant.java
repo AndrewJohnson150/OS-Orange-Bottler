@@ -120,21 +120,21 @@ public class Plant implements Runnable {
 	}
 
 	/**
-	 * this sets timeToWork to false and calls the stopWork() function on the
-	 * first worker.
+	 * this sets timeToWork to false and calls the stopWork() function on each worker, which
+	 * should begin the process of that thread stop working.
 	 * 
 	 * @see Worker
 	 */
-	public void stopPlant() {
+	public synchronized void stopPlant() {
 		timeToWork = false;
-
 		for (Worker w : workers) {
 			w.stopWork(); 
 		}
+		notifyAll();
 	}
 
 	/**
-	 * this calls thread.join
+	 * this calls thread.join for all workers and the plant itself.
 	 */
 	public void waitToStop() {
 		try {
@@ -148,26 +148,20 @@ public class Plant implements Runnable {
 	}
 
 	/**
-	 * semi-busy loops for as long as it is timeToWork==true. Prints out '.'s
-	 * while running so that the user knows the program is running
+	 * Starts the worker's run methods and then blocks until stopPlant() wakes it up.
 	 */
-	public void run() {
+	public synchronized void run() {
 		for (Worker w : workers) {
 			w.startWork(); 
 		}	
 		System.out.print(Thread.currentThread().getName() + " Processing oranges");
-		while (timeToWork) {
-			System.out.print(".");
-			try {
-				Thread.sleep(500);
-			} catch (Exception ignored) {
-			}
-		}
+		try {
+			wait();
+		} catch (Exception ignored) {}
 		System.out.println("");
 	}
 
 	/**
-	 * 
 	 * @return number of oranges the first worker fetched, AKA the number of
 	 *         provided oranges
 	 */
@@ -176,7 +170,6 @@ public class Plant implements Runnable {
 	}
 
 	/**
-	 * 
 	 * @return total amount of processed oranges.
 	 */
 	public int getProcessedOranges() {
